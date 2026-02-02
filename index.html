@@ -5,84 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>予定登録</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: sans-serif;
-            max-width: 500px;
-            margin: 20px auto;
-            padding: 20px;
             background: #f5f5f5;
+            padding: 10px;
         }
         .container {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         h2 {
             color: #0078d4;
-            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
         }
         label {
             display: block;
-            margin-top: 15px;
+            margin-top: 8px;
             font-weight: bold;
+            font-size: 13px;
         }
         input, textarea {
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
+            padding: 6px;
+            margin-top: 3px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
+            font-size: 14px;
         }
-        button {
-            width: 100%;
-            background: #0078d4;
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 4px;
-            margin-top: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
+        input:disabled {
+            background: #f0f0f0;
+            color: #999;
         }
-        button:active {
-            background: #005a9e;
+        textarea {
+            resize: none;
         }
         .preset-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 5px;
+            margin-top: 8px;
         }
         .preset-btn {
-            padding: 10px;
-            background: #e6f3ff;
+            padding: 8px;
+            background: #0078d4;
+            color: white;
             border: 1px solid #0078d4;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
-        .preset-btn:active {
-            background: #cce4ff;
+        .preset-btn.selected {
+            background: #005a9e;
+            border: 2px solid #003d6b;
         }
-        .info {
-            background: #e6f3ff;
-            padding: 10px;
+        .preset-btn.full-width {
+            grid-column: span 2;
+        }
+        .time-preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .time-preset-btn {
+            padding: 6px;
+            background: #ff8c00;
+            color: white;
+            border: 1px solid #ff8c00;
             border-radius: 4px;
-            margin-top: 15px;
-            font-size: 14px;
+            cursor: pointer;
+            font-size: 12px;
         }
-        .all-day-toggle {
-            display: flex;
-            align-items: center;
+        .time-preset-btn.selected {
+            background: #cc7000;
+            border: 2px solid #994400;
+        }
+        #sendBtn {
+            width: 100%;
+            background: #0078d4;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
             margin-top: 10px;
-        }
-        .all-day-toggle input {
-            width: auto;
-            margin-right: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -90,83 +106,109 @@
     <div class="container">
         <h2>📅 予定登録</h2>
         
-        <label>予定のタイトル:</label>
-        <input type="text" id="title" placeholder="例: 有給休暇" required>
+        <label>タイトル</label>
+        <input type="text" id="title" placeholder="例: 年休" required>
         
         <div class="preset-buttons">
-            <button type="button" class="preset-btn" onclick="setTitle('有給休暇')">有給休暇</button>
-            <button type="button" class="preset-btn" onclick="setTitle('半休（午前）')">半休（午前）</button>
-            <button type="button" class="preset-btn" onclick="setTitle('半休（午後）')">半休（午後）</button>
-            <button type="button" class="preset-btn" onclick="setTitle('病欠')">病欠</button>
+            <button type="button" class="preset-btn full-width" onclick="setPreset('年休', 'allday', this)">年休</button>
+            <button type="button" class="preset-btn" onclick="setPreset('半休（午前）', 'am', this)">半休（午前）</button>
+            <button type="button" class="preset-btn" onclick="setPreset('半休（午後）', 'pm', this)">半休（午後）</button>
+            <button type="button" class="preset-btn" onclick="setPreset('フレ＋', 'manual', this)">フレ＋</button>
+            <button type="button" class="preset-btn" onclick="setPreset('フレ－', 'manual', this)">フレ－</button>
         </div>
         
-        <label>日付:</label>
+        <label>日付</label>
         <input type="date" id="date" required>
         
-        <div class="all-day-toggle">
-            <input type="checkbox" id="allDay" checked onchange="toggleAllDay()">
-            <label for="allDay" style="margin:0">終日の予定</label>
+        <label>時間帯</label>
+        <div class="time-preset-buttons">
+            <button type="button" class="time-preset-btn selected" onclick="setTimeMode('manual', this)">入力</button>
+            <button type="button" class="time-preset-btn" onclick="setTimeMode('allday', this)">終日</button>
+            <button type="button" class="time-preset-btn" onclick="setTimeMode('am', this)">午前</button>
+            <button type="button" class="time-preset-btn" onclick="setTimeMode('pm', this)">午後</button>
         </div>
         
-        <div id="timeInputs" style="display:none;">
-            <label>開始時刻:</label>
-            <input type="time" id="startTime" value="09:00">
-            
-            <label>終了時刻:</label>
-            <input type="time" id="endTime" value="18:00">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
+            <div>
+                <label>開始</label>
+                <input type="time" id="startTime" value="09:00">
+            </div>
+            <div>
+                <label>終了</label>
+                <input type="time" id="endTime" value="17:35">
+            </div>
         </div>
         
-        <label>備考（任意）:</label>
-        <textarea id="note" rows="2" placeholder="例: 病院受診のため"></textarea>
+        <label>備考</label>
+        <textarea id="note" rows="1" placeholder="任意"></textarea>
         
-        <button onclick="sendMail()">メール送信</button>
-        
-        <div class="info">
-            ℹ️ タップするとGmailアプリが開きます
-        </div>
+        <button id="sendBtn" onclick="sendMail()">メール送信</button>
     </div>
 
     <script>
         document.getElementById('date').valueAsDate = new Date();
         
-        function setTitle(title) {
+        function setPreset(title, timeMode, btn) {
             document.getElementById('title').value = title;
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeMode(timeMode);
+            document.querySelectorAll('.time-preset-btn').forEach(b => b.classList.remove('selected'));
+            const timeModeBtn = Array.from(document.querySelectorAll('.time-preset-btn')).find(b => {
+                if (timeMode === 'manual') return b.textContent === '入力';
+                if (timeMode === 'allday') return b.textContent === '終日';
+                if (timeMode === 'am') return b.textContent === '午前';
+                if (timeMode === 'pm') return b.textContent === '午後';
+            });
+            if (timeModeBtn) timeModeBtn.classList.add('selected');
         }
         
-        function toggleAllDay() {
-            const allDay = document.getElementById('allDay').checked;
-            document.getElementById('timeInputs').style.display = allDay ? 'none' : 'block';
+        function setTimeMode(mode, btn = null) {
+            const startTime = document.getElementById('startTime');
+            const endTime = document.getElementById('endTime');
+            if (btn) {
+                document.querySelectorAll('.time-preset-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            }
+            switch(mode) {
+                case 'manual':
+                    startTime.disabled = false;
+                    endTime.disabled = false;
+                    break;
+                case 'allday':
+                    startTime.value = '00:00';
+                    endTime.value = '23:59';
+                    startTime.disabled = true;
+                    endTime.disabled = true;
+                    break;
+                case 'am':
+                    startTime.value = '09:00';
+                    endTime.value = '12:15';
+                    startTime.disabled = true;
+                    endTime.disabled = true;
+                    break;
+                case 'pm':
+                    startTime.value = '13:00';
+                    endTime.value = '17:35';
+                    startTime.disabled = true;
+                    endTime.disabled = true;
+                    break;
+            }
         }
         
         function sendMail() {
             const title = document.getElementById('title').value;
             const date = document.getElementById('date').value;
-            const allDay = document.getElementById('allDay').checked;
             const startTime = document.getElementById('startTime').value;
             const endTime = document.getElementById('endTime').value;
             const note = document.getElementById('note').value;
-            
             if (!title || !date) {
                 alert('タイトルと日付を入力してください');
                 return;
             }
-            
-            let start, end;
-            
-            if (allDay) {
-                start = '00:00';
-                end = '23:59';
-            } else {
-                start = startTime;
-                end = endTime;
-            }
-            
-            const subject = `【CAL2026】${title}|${date}|${start}|${end}`;
+            const subject = `【CAL2026】${title}|${date}|${startTime}|${endTime}`;
             const body = note || '自動登録';
-            
-            // mailto: を使用（GitHub Pagesなら動作する）
             const mailtoLink = `mailto:yuta.takizawa@jp.gs-yuasa.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
             window.location.href = mailtoLink;
         }
     </script>
